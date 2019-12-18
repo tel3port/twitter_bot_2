@@ -23,6 +23,7 @@ tweet_source_list = ["FactSoup",
 image_list = glob.glob("media/*")
 
 first_line = True
+
 try:
     with open(gls.tweets_csv, gls.read) as rdr:
         reader = csv.reader(rdr, delimiter=",")
@@ -32,7 +33,6 @@ try:
                 continue  # used this way, the rest of the code from here is skipped in this loop
 
             custom_tweet_list.append(single_row)
-
 except IOError as x:
     print("problem reading the csv")
     logging.error('Error occurred ' + str(x))
@@ -42,6 +42,20 @@ except Exception as e:
 
 finally:
     pass
+
+
+def save_last_seen_id(my_id, my_file):
+    f_write = open(my_file, 'w')
+    f_write.write(str(my_id))
+    f_write.close()
+    return
+
+
+def get_last_seen_id(my_file):
+    f_read = open(my_file, "r")
+    last_seen_id = int(f_read.read().strip())
+    f_read.close()
+    return last_seen_id
 
 
 # saves tweets into file
@@ -225,6 +239,7 @@ def tweet_sender(single_handle, single_tweet, single_hashtag):
     print("tweet_sender() has terminated")
 
 
+# follows the handle given
 def twitter_user_follower(single_handle):
     print("starting twitter_user_follower()")
 
@@ -247,20 +262,6 @@ def twitter_user_follower(single_handle):
         pass
 
     print("twitter_user_follower() has terminated")
-
-
-def save_last_seen_id(my_id, my_file):
-    f_write = open(my_file, 'w')
-    f_write.write(str(my_id))
-    f_write.close()
-    return
-
-
-def get_last_seen_id(my_file):
-    f_read = open(my_file, "r")
-    last_seen_id = int(f_read.read().strip())
-    f_read.close()
-    return last_seen_id
 
 
 # this replies to all mentions in a loop
@@ -354,6 +355,7 @@ def image_tweeter(single_image, single_tweet, single_hashtag):
     print("image_tweeter() has terminated")
 
 
+# replies to single tweets
 def single_tweet_replier(single_tweet, tweet_id):
     print("starting single_tweet_replier()")
 
