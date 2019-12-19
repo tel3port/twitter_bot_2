@@ -6,15 +6,20 @@ import glob
 
 print("starting my engines...")
 
-my_minion_list = []
-minion_id_list = []
-custom_tweet_list = []
-custom_handle_list = []
-follower_list = []
-follower_id_list = []
+minions_dict = {}
+dld_tweet_dict = {}
+ht_tweet_dict = {}
+follower_id_dict = {}
+
+hashtag_list = ["#USA",
+                "#Christians",
+                "#Christmas",
+                "#TwitterMomentOfTheDecade"
+                ]
 handle_source_list = ["FactSoup",
                       "Casey",
-                      "ithinkthatway"
+                      "ithinkthatway",
+                      "#Christmas"
                       ]
 tweet_source_list = ["FactSoup",
                      "Fact",
@@ -22,26 +27,99 @@ tweet_source_list = ["FactSoup",
                      "ithinkthatway"]
 image_list = glob.glob("media/*")
 
-first_line = True
 
-try:
-    with open(gls.tweets_csv, gls.read) as rdr:
-        reader = csv.reader(rdr, delimiter=",")
-        for single_row in reader:
-            if first_line:  # this skips th first line
-                first_line = False
-                continue  # used this way, the rest of the code from here is skipped in this loop
+def dict_loader():  # loads all downloaded data into respective dictionaries
+    first_line = True
 
-            custom_tweet_list.append(single_row)
-except IOError as x:
-    print("problem reading the csv")
-    logging.error('Error occurred ' + str(x))
-except Exception as e:
-    print("the problem is: ", e)
-    logging.error('Error occurred ' + str(e))
+    try:
+        with open("minions_and_ids.csv", gls.read) as rdr:
+            reader = csv.reader(rdr, delimiter=",")
+            for single_row in reader:
+                if first_line:  # this skips th first line
+                    first_line = False
+                    continue  # used this way, the rest of the code from here is skipped in this loop
 
-finally:
-    pass
+                minions_dict[single_row[0][:-1]] = single_row[1]  # adding minion data as key value pairs
+
+    except IOError as x:
+        print("problem reading the minions_and_ids csv")
+        logging.error('Error occurred ' + str(x))
+    except Exception as e:
+        print("the problem is: ", e)
+        logging.error('Error occurred ' + str(e))
+
+    finally:
+        print(minions_dict)
+        pass
+
+    first_line = True
+
+    try:
+        with open("downloaded_tweets.csv", gls.read) as rdr:
+            reader = csv.reader(rdr, delimiter=",")
+            for single_row in reader:
+                if first_line:  # this skips th first line
+                    first_line = False
+                    continue  # used this way, the rest of the code from here is skipped in this loop
+
+                dld_tweet_dict[single_row[0]] = single_row[2]  # adding minion data as key value pairs
+
+    except IOError as x:
+        print("problem reading the downloaded_tweets csv")
+        logging.error('Error occurred ' + str(x))
+    except Exception as e:
+        print("the problem is: ", e)
+        logging.error('Error occurred ' + str(e))
+
+    finally:
+        print(dld_tweet_dict)
+        pass
+
+    first_line = True
+
+    try:
+        with open("tweets_&_ids.csv", gls.read) as rdr:
+            reader = csv.reader(rdr, delimiter=",")
+            for single_row in reader:
+                if first_line:  # this skips th first line
+                    first_line = False
+                    continue  # used this way, the rest of the code from here is skipped in this loop
+
+                ht_tweet_dict[single_row[0]] = single_row[1]  # adding minion data as key value pairs
+
+    except IOError as x:
+        print("problem reading the tweets_&_ids csv")
+        logging.error('Error occurred ' + str(x))
+    except Exception as e:
+        print("the problem is: ", e)
+        logging.error('Error occurred ' + str(e))
+
+    finally:
+        print(ht_tweet_dict)
+        pass
+
+    first_line = True
+
+    try:
+        with open("follower_and_ids.csv", gls.read) as rdr:
+            reader = csv.reader(rdr, delimiter=",")
+            for single_row in reader:
+                if first_line:  # this skips th first line
+                    first_line = False
+                    continue  # used this way, the rest of the code from here is skipped in this loop
+
+                follower_id_dict[single_row[0]] = single_row[1]  # adding minion data as key value pairs
+
+    except IOError as x:
+        print("problem reading the tweets_&_ids csv")
+        logging.error('Error occurred ' + str(x))
+    except Exception as e:
+        print("the problem is: ", e)
+        logging.error('Error occurred ' + str(e))
+
+    finally:
+        print(follower_id_dict)
+        pass
 
 
 def save_last_seen_id(my_id, my_file):
@@ -126,7 +204,7 @@ def follower_extractor(follower_and_id_csv, single_handle):
         csv_writer = csv.writer(fol_id_csv)
         for single_follower in tweepy.Cursor(gls.api.followers, screen_name=single_handle).items():
             print(f"{single_follower.id} - {single_follower.screen_name}")
-            csv_writer.writerow([str(single_follower.id) + "x", single_follower.screen_name.encode('utf-8')])
+            csv_writer.writerow([str(single_follower.id), single_follower.screen_name.encode('utf-8')])
             print("row (hopefully )written into csv")
 
     except tweepy.TweepError as em:
@@ -134,9 +212,6 @@ def follower_extractor(follower_and_id_csv, single_handle):
 
     finally:
         pass
-
-    print("len of follower id list ", len(follower_id_list))
-    print("len of handle list ", len(follower_list))
 
 
 # extracts all tweets of a given user
@@ -176,7 +251,7 @@ def tweet_fetcher(screen_name):
     out_tweets = [[tweet.id_str, tweet.created_at, tweet.text.encode("utf-8")] for tweet in all_tweets]
 
     # write the csv
-    with open('%s_tweets.csv' % screen_name, 'wb') as f:
+    with open("downloaded_tweets.csv", 'wb') as f:
         writer = csv.writer(f)
         writer.writerow(["id", "created_at", "text"])
         writer.writerows(out_tweets)
@@ -191,9 +266,9 @@ def my_minion_extractor(my_minion_csv, my_twitter_ac):
     try:
         minion_csv = open(my_minion_csv, gls.write)
         csv_writer = csv.writer(minion_csv)
-        for single_follower in tweepy.Cursor(gls.api.followers, screen_name=my_twitter_ac).items():
-            print(f"fol id: {single_follower.id} -  fol name: {single_follower.screen_name}")
-            csv_writer.writerow([str(single_follower.id) + "x", single_follower.screen_name.encode('utf-8')])
+        for single_minion in tweepy.Cursor(gls.api.followers, screen_name=my_twitter_ac).items():
+            print(f"minion id: {single_minion.id} -  minion name: {single_minion.screen_name}")
+            csv_writer.writerow([str(single_minion.id) + "x", single_minion.screen_name.encode('utf-8')])
             print("row (hopefully )written into csv")
 
     except tweepy.TweepError as ev:
@@ -303,7 +378,7 @@ def custom_replier():
     print("custom_replier() has terminated ")
 
 
-# downloads likes and retweets and saves om a given hashtag
+# downloads likes and retweets and saves on a given hashtag
 def tweet_list_downloader(downloaded_tweets_csv, hashtag):
     gls.log_file_writer()
 
@@ -319,7 +394,7 @@ def tweet_list_downloader(downloaded_tweets_csv, hashtag):
 
             print(single_tweet.author, single_tweet.created_at, single_tweet.text)
 
-            csv_writer.writerow([str(single_tweet.id_str) + "x", single_tweet.text.encode('utf-8')])
+            csv_writer.writerow([str(single_tweet.id_str), single_tweet.text.encode('utf-8')])
 
             print("row (hopefully) written into csv")
 
@@ -378,13 +453,22 @@ def single_tweet_replier(single_tweet_text, tweet_id):
     print("single_tweet_replier() has terminated ")
 
 
-tweet_list_downloader("tweets_&_ids.csv", "#USA")
-
-tweet_fetcher("Casey")
+print("starting with the data downloads...")
 
 my_minion_extractor("minion_and_ids.csv", "awesome1_inc")
-
+tweet_fetcher("Casey")
+tweet_list_downloader("tweets_&_ids.csv", "#USA")
 follower_extractor("follower_and_ids.csv", "FactSoup")
+
+
+
+
+
+
+
+
+
+
 
 
 
