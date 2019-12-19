@@ -5,7 +5,7 @@ import time
 
 tweets_csv = "tweets.csv"
 handles_txt = 'handles.txt'
-dld_tweets_txt = "downloaded_tweets.txt"
+dld_tweets_txt = "downloaded_handles.txt"
 value_holder_file = 'last_seen_id.txt'
 
 write = 'w'
@@ -39,3 +39,8 @@ def log_file_writer():
                                format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s',
                                datefmt='%Y-%m-%d:%H:%M:%S',
                                level=logging.ERROR)
+
+
+# TODO put all the methods together
+# TODO set up a single USA MB lander
+# TODO set up 4 more apps and make this bot control them all. Target the US

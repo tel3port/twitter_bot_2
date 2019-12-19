@@ -58,75 +58,76 @@ def get_last_seen_id(my_file):
     return last_seen_id
 
 
-# saves tweets into file
-def save_downloaded_tweets(tweet_list, my_file):
-    f_write = open(my_file, gls.write)
-    for single_tweet in tweet_list:
-        try:
-            f_write.write(str(single_tweet))
-            f_write.write("\n")
-        except Exception as ex:
-            print("the issue is: ", e)
-            logging.error('Error occurred ' + str(ex))
-        finally:
-            f_write.close()
-    return
-
-
-# reads tweets as list
-def read_downloaded_tweets(my_file):
-    downloaded_tweets = []
-    f_read = open(my_file, gls.read)
-    try:
-        downloaded_tweets = f_read.readlines()
-    except Exception as ep:
-        print("problem reading list, ", ep)
-        logging.error('Error occurred ' + str(ep))
-    finally:
-        f_read.close()
-    return downloaded_tweets
-
-
-# saves handles into a file
-def save_downloaded_handles(handle_list, my_file):
-    f_write = open(my_file, gls.write)
-    for single_handle in handle_list:
-        try:
-            f_write.write(str(single_handle))
-            f_write.write(str("\n"))
-        except Exception as e1:
-            print("the problem is, ", e1)
-            logging.error('Error occurred ' + str(e1))
-
-        finally:
-            f_write.close()
-    return
-
-
-# reads handles into a file
-def read_saved_handles(my_file):
-    handles = []
-    f_read = open(my_file, gls.read)
-    try:
-        handles = f_read.readlines()
-    except Exception as ep:
-        print("problem reading handles list, ", ep)
-        logging.error('Error occurred ' + str(ep))
-    finally:
-        f_read.close()
-    return handles
+# # saves tweets into file
+# def save_downloaded_followers(followers_list, my_file):
+#     f_write = open(my_file, gls.write)
+#     for single_follower in followers_list:
+#         try:
+#             f_write.write(str(single_follower))
+#             f_write.write("\n")
+#         except Exception as ex:
+#             print("the issue is: ", e)
+#             logging.error('Error occurred ' + str(ex))
+#         finally:
+#             f_write.close()
+#     return
+#
+#
+# # reads tweets as list
+# def read_downloaded_followers(my_file):
+#     downloaded_tweets = []
+#     f_read = open(my_file, gls.read)
+#     try:
+#         downloaded_tweets = f_read.readlines()
+#     except Exception as ep:
+#         print("problem reading list, ", ep)
+#         logging.error('Error occurred ' + str(ep))
+#     finally:
+#         f_read.close()
+#     return downloaded_tweets
+#
+#
+# # saves handles into a file
+# def save_downloaded_handles(handle_list, my_file):
+#     f_write = open(my_file, gls.write)
+#     for single_handle in handle_list:
+#         try:
+#             f_write.write(str(single_handle))
+#             f_write.write(str("\n"))
+#         except Exception as e1:
+#             print("the problem is, ", e1)
+#             logging.error('Error occurred ' + str(e1))
+#
+#         finally:
+#             f_write.close()
+#     return
+#
+#
+# # reads handles into a file
+# def read_saved_handles(my_file):
+#     handles = []
+#     f_read = open(my_file, gls.read)
+#     try:
+#         handles = f_read.readlines()
+#     except Exception as ep:
+#         print("problem reading handles list, ", ep)
+#         logging.error('Error occurred ' + str(ep))
+#     finally:
+#         f_read.close()
+#     return handles
 
 
 # gets a list of all followers from a given user
-def follower_extractor(single_handle):
+def follower_extractor(follower_and_id_csv, single_handle):
     print(" follower_extractor() starting...")
     gls.log_file_writer()
     try:
+        fol_id_csv = open(follower_and_id_csv, gls.write)
+        csv_writer = csv.writer(fol_id_csv)
         for single_follower in tweepy.Cursor(gls.api.followers, screen_name=single_handle).items():
             print(f"{single_follower.id} - {single_follower.screen_name}")
-            follower_list.append(single_follower.screen_name)
-            follower_id_list.append(single_follower.id)
-            break
+            csv_writer.writerow([str(single_follower.id) + "x", single_follower.screen_name.encode('utf-8')])
+            print("row (hopefully )written into csv")
 
     except tweepy.TweepError as em:
         logging.error('Error occurred ' + str(em))
@@ -150,6 +151,8 @@ def tweet_fetcher(screen_name):
 
     # save most recent tweets
     all_tweets.extend(new_tweets)
+
+    print(all_tweets)
 
     # save the id of the oldest tweet less one
     oldest = all_tweets[-1].id - 1
@@ -181,24 +184,23 @@ def tweet_fetcher(screen_name):
     pass
 
 
-# this loop gets a list of everyone i follow
-def minion_extractor(self):
+# this loop gets a list handles and ids of everyone i follow
+def my_minion_extractor(my_minion_csv, my_twitter_ac):
     print(" minion_extractor() starting...")
     gls.log_file_writer()
     try:
-        for single_follower in tweepy.Cursor(gls.api.followers, screen_name="awesome1_inc").items():
-            print(f"{single_follower.id} - {single_follower.screen_name}")
-            my_minion_list.append(single_follower.screen_name)
-            minion_id_list.append(single_follower.id)
+        minion_csv = open(my_minion_csv, gls.write)
+        csv_writer = csv.writer(minion_csv)
+        for single_follower in tweepy.Cursor(gls.api.followers, screen_name=my_twitter_ac).items():
+            print(f"fol id: {single_follower.id} -  fol name: {single_follower.screen_name}")
+            csv_writer.writerow([str(single_follower.id) + "x", single_follower.screen_name.encode('utf-8')])
+            print("row (hopefully )written into csv")
 
     except tweepy.TweepError as ev:
         logging.error('Error occurred ' + str(ev))
 
     finally:
         pass
-
-    print("len of follower id list ", len(self.follower_id_list))
-    print("len of handle list ", len(self.screen_name_list))
 
 
 # only sends dms to people that follow me
@@ -306,21 +308,20 @@ def tweet_list_downloader(downloaded_tweets_csv, hashtag):
     gls.log_file_writer()
 
     try:
-        tweets_csv = open(downloaded_tweets_csv, "w")
+        tweets_csv = open(downloaded_tweets_csv, gls.write)
         csv_writer = csv.writer(tweets_csv)
         print("hashtag downloading on: ", hashtag)
-        for single_tweet in tweepy.Cursor(gls.api.search, q=hashtag, rpp=1200, lang="en", since="'2018-08-17'").items(1000):
+        for single_tweet in tweepy.Cursor(gls.api.search, q=hashtag, rpp=1200, lang="en", since="2018-08-17").items(100000):
             print(single_tweet.id_str)
             single_tweet.favorite()
             gls.sleep_time()
             single_tweet.retweet()
-            gls.sleep_time()
 
             print(single_tweet.author, single_tweet.created_at, single_tweet.text)
 
             csv_writer.writerow([str(single_tweet.id_str) + "x", single_tweet.text.encode('utf-8')])
 
-            print("row (hopefully )written into csv")
+            print("row (hopefully) written into csv")
 
     except IOError as e2:
         logging.error('Error occurred ' + str(e2))
@@ -356,13 +357,13 @@ def image_tweeter(single_image, single_tweet, single_hashtag):
 
 
 # replies to single tweets
-def single_tweet_replier(single_tweet, tweet_id):
+def single_tweet_replier(single_tweet_text, tweet_id):
     print("starting single_tweet_replier()")
 
     gls.log_file_writer()
 
     try:
-        gls.api.update_status(status=single_tweet, in_reply_to_status_id=tweet_id[:-1])
+        gls.api.update_status(status=single_tweet_text, in_reply_to_status_id=tweet_id[:-1])
         gls.sleep_time()
 
     except tweepy.TweepError as re:
@@ -375,5 +376,21 @@ def single_tweet_replier(single_tweet, tweet_id):
         pass
 
     print("single_tweet_replier() has terminated ")
+
+
+tweet_list_downloader("tweets_&_ids.csv", "#USA")
+
+tweet_fetcher("Casey")
+
+my_minion_extractor("minion_and_ids.csv", "awesome1_inc")
+
+follower_extractor("follower_and_ids.csv", "FactSoup")
+
+
+
+
+
+
+
 
 
