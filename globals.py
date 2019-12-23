@@ -40,7 +40,3 @@ def log_file_writer():
                                datefmt='%Y-%m-%d:%H:%M:%S',
                                level=logging.ERROR)
 
-
-# TODO put all the methods together
-# TODO set up a single USA MB lander
-# TODO set up 4 more apps and make this bot control them all. Target the US

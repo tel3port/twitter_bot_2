@@ -455,11 +455,18 @@ def single_tweet_replier(single_tweet_text, tweet_id):
 
 print("starting with the data downloads...")
 
+
 my_minion_extractor("minion_and_ids.csv", "awesome1_inc")
 tweet_fetcher("Casey")
 tweet_list_downloader("tweets_&_ids.csv", "#USA")
 follower_extractor("follower_and_ids.csv", "FactSoup")
 
+
+dict_loader()
+print(f'minion dict len: {len(minions_dict)} ')
+print(f'dld_tweet_dict len: {len(dld_tweet_dict)} ')
+print(f'ht_tweet_dict len: {len(ht_tweet_dict)} ')
+print(f'follower_id_dict len: {len(follower_id_dict)} ')
 
 
 
