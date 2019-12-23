@@ -1,0 +1,4 @@
+2019-12-23:21:55:54,418 ERROR    [BotEngine.py:418] Error occurred [{'code': 139, 'message': 'You have already favorited this status.'}]
+2019-12-23:22:03:52,917 ERROR    [BotEngine.py:46] Error occurred [Errno 2] No such file or directory: 'minions_and_ids.csv'
+2019-12-23:22:33:40,834 ERROR    [BotEngine.py:414] Error occurred [{'code': 139, 'message': 'You have already favorited this status.'}]
+2019-12-23:22:37:52,913 ERROR    [BotEngine.py:414] Error occurred [{'code': 139, 'message': 'You have already favorited this status.'}]

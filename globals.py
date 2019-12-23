@@ -26,7 +26,7 @@ random_num = randint(1, 5)
 
 
 def sleep_time():
-    t = randint(15, 120)
+    t = randint(1, 5)
     print(f"thread sleeping for {t} seconds...")
 
     time.sleep(t)

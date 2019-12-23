@@ -42,5 +42,6 @@ test_dict = {
     "d": function4(),
     "e": function5()}
 
+print(str(123) + 'x')
 
 

@@ -29,15 +29,11 @@ image_list = glob.glob("media/*")
 
 
 def dict_loader():  # loads all downloaded data into respective dictionaries
-    first_line = True
 
     try:
-        with open("minions_and_ids.csv", gls.read) as rdr:
+        with open("minion_and_ids.csv", gls.read) as rdr:
             reader = csv.reader(rdr, delimiter=",")
             for single_row in reader:
-                if first_line:  # this skips th first line
-                    first_line = False
-                    continue  # used this way, the rest of the code from here is skipped in this loop
 
                 minions_dict[single_row[0][:-1]] = single_row[1]  # adding minion data as key value pairs
 
@@ -62,7 +58,7 @@ def dict_loader():  # loads all downloaded data into respective dictionaries
                     first_line = False
                     continue  # used this way, the rest of the code from here is skipped in this loop
 
-                dld_tweet_dict[single_row[0]] = single_row[2]  # adding minion data as key value pairs
+                dld_tweet_dict[single_row[0][:-1]] = single_row[2]  # adding minion data as key value pairs
 
     except IOError as x:
         print("problem reading the downloaded_tweets csv")
@@ -85,7 +81,7 @@ def dict_loader():  # loads all downloaded data into respective dictionaries
                     first_line = False
                     continue  # used this way, the rest of the code from here is skipped in this loop
 
-                ht_tweet_dict[single_row[0]] = single_row[1]  # adding minion data as key value pairs
+                ht_tweet_dict[single_row[0][:-1]] = single_row[1]  # adding minion data as key value pairs
 
     except IOError as x:
         print("problem reading the tweets_&_ids csv")
@@ -108,7 +104,7 @@ def dict_loader():  # loads all downloaded data into respective dictionaries
                     first_line = False
                     continue  # used this way, the rest of the code from here is skipped in this loop
 
-                follower_id_dict[single_row[0]] = single_row[1]  # adding minion data as key value pairs
+                follower_id_dict[single_row[0][:-1]] = single_row[1]  # adding minion data as key value pairs
 
     except IOError as x:
         print("problem reading the tweets_&_ids csv")
@@ -204,13 +200,16 @@ def follower_extractor(follower_and_id_csv, single_handle):
         csv_writer = csv.writer(fol_id_csv)
         for single_follower in tweepy.Cursor(gls.api.followers, screen_name=single_handle).items():
             print(f"{single_follower.id} - {single_follower.screen_name}")
-            csv_writer.writerow([str(single_follower.id), single_follower.screen_name.encode('utf-8')])
+            csv_writer.writerow([str(single_follower.id)+'x', single_follower.screen_name.encode('utf-8')])
             print("row (hopefully )written into csv")
 
     except tweepy.TweepError as em:
         logging.error('Error occurred ' + str(em))
+        print('Error occurred ' + str(em))
 
     finally:
+        print(" follower_extractor() done")
+
         pass
 
 
@@ -248,10 +247,10 @@ def tweet_fetcher(screen_name):
         print("...%s tweets downloaded so far" % (len(all_tweets)))
 
     # transform the tweepy tweets into a 2D array that will populate the csv
-    out_tweets = [[tweet.id_str, tweet.created_at, tweet.text.encode("utf-8")] for tweet in all_tweets]
+    out_tweets = [[tweet.id_str+'x', tweet.created_at, tweet.text.encode("utf-8")] for tweet in all_tweets]
 
     # write the csv
-    with open("downloaded_tweets.csv", 'wb') as f:
+    with open("downloaded_tweets.csv", gls.write) as f:
         writer = csv.writer(f)
         writer.writerow(["id", "created_at", "text"])
         writer.writerows(out_tweets)
@@ -268,13 +267,16 @@ def my_minion_extractor(my_minion_csv, my_twitter_ac):
         csv_writer = csv.writer(minion_csv)
         for single_minion in tweepy.Cursor(gls.api.followers, screen_name=my_twitter_ac).items():
             print(f"minion id: {single_minion.id} -  minion name: {single_minion.screen_name}")
-            csv_writer.writerow([str(single_minion.id) + "x", single_minion.screen_name.encode('utf-8')])
+            csv_writer.writerow([str(single_minion.id)+'x', single_minion.screen_name.encode('utf-8')])
             print("row (hopefully )written into csv")
 
     except tweepy.TweepError as ev:
         logging.error('Error occurred ' + str(ev))
+        print('Error occurred ' + str(ev))
 
     finally:
+        print("minion extraction done")
+
         pass
 
 
@@ -288,9 +290,11 @@ def dm_sender(minion_id, text):
 
     except tweepy.TweepError as ue:
         logging.error('Error occurred ' + str(ue))
+        print('Error occurred ' + str(ue))
 
     except Exception as ep:
         logging.error('Error occurred ' + str(ep))
+        print('Error occurred ' + str(ep))
 
     finally:
         pass
@@ -309,6 +313,7 @@ def tweet_sender(single_handle, single_tweet, single_hashtag):
 
     except tweepy.TweepError as ed:
         logging.error('Error occurred ' + str(ed))
+        print('Error occurred ' + str(ed))
 
     finally:
         pass
@@ -331,6 +336,7 @@ def twitter_user_follower(single_handle):
 
     except tweepy.TweepError as ef:
         logging.error('Error occurred ' + str(ef))
+        print('Error occurred ' + str(ef))
 
     except Exception as eg:
         logging.error('Error occurred ' + str(eg))
@@ -394,7 +400,7 @@ def tweet_list_downloader(downloaded_tweets_csv, hashtag):
 
             print(single_tweet.author, single_tweet.created_at, single_tweet.text)
 
-            csv_writer.writerow([str(single_tweet.id_str), single_tweet.text.encode('utf-8')])
+            csv_writer.writerow([str(single_tweet.id_str)+'x', single_tweet.text.encode('utf-8')])
 
             print("row (hopefully) written into csv")
 
@@ -461,27 +467,10 @@ tweet_fetcher("Casey")
 tweet_list_downloader("tweets_&_ids.csv", "#USA")
 follower_extractor("follower_and_ids.csv", "FactSoup")
 
-
 dict_loader()
-print(f'minion dict len: {len(minions_dict)} ')
-print(f'dld_tweet_dict len: {len(dld_tweet_dict)} ')
-print(f'ht_tweet_dict len: {len(ht_tweet_dict)} ')
-print(f'follower_id_dict len: {len(follower_id_dict)} ')
 
+print(minions_dict)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+print("starting with the outbound messages...")
 
 
