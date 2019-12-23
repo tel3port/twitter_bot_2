@@ -11,16 +11,16 @@ dld_tweet_dict = {}
 ht_tweet_dict = {}
 follower_id_dict = {}
 
-hashtag_list = ["#USA",
-                "#Christians",
-                "#Christmas",
-                "#TwitterMomentOfTheDecade"
-                ]
 handle_source_list = ["FactSoup",
                       "Casey",
                       "ithinkthatway",
                       "#Christmas"
                       ]
+hashtag_list = ["#USA",
+                "#Christians",
+                "#Christmas",
+                "#TwitterMomentOfTheDecade"
+                ]
 tweet_source_list = ["FactSoup",
                      "Fact",
                      "SmiIe",
@@ -130,65 +130,6 @@ def get_last_seen_id(my_file):
     last_seen_id = int(f_read.read().strip())
     f_read.close()
     return last_seen_id
-
-
-# # saves tweets into file
-# def save_downloaded_followers(followers_list, my_file):
-#     f_write = open(my_file, gls.write)
-#     for single_follower in followers_list:
-#         try:
-#             f_write.write(str(single_follower))
-#             f_write.write("\n")
-#         except Exception as ex:
-#             print("the issue is: ", e)
-#             logging.error('Error occurred ' + str(ex))
-#         finally:
-#             f_write.close()
-#     return
-#
-#
-# # reads tweets as list
-# def read_downloaded_followers(my_file):
-#     downloaded_tweets = []
-#     f_read = open(my_file, gls.read)
-#     try:
-#         downloaded_tweets = f_read.readlines()
-#     except Exception as ep:
-#         print("problem reading list, ", ep)
-#         logging.error('Error occurred ' + str(ep))
-#     finally:
-#         f_read.close()
-#     return downloaded_tweets
-#
-#
-# # saves handles into a file
-# def save_downloaded_handles(handle_list, my_file):
-#     f_write = open(my_file, gls.write)
-#     for single_handle in handle_list:
-#         try:
-#             f_write.write(str(single_handle))
-#             f_write.write(str("\n"))
-#         except Exception as e1:
-#             print("the problem is, ", e1)
-#             logging.error('Error occurred ' + str(e1))
-#
-#         finally:
-#             f_write.close()
-#     return
-#
-#
-# # reads handles into a file
-# def read_saved_handles(my_file):
-#     handles = []
-#     f_read = open(my_file, gls.read)
-#     try:
-#         handles = f_read.readlines()
-#     except Exception as ep:
-#         print("problem reading handles list, ", ep)
-#         logging.error('Error occurred ' + str(ep))
-#     finally:
-#         f_read.close()
-#     return handles
 
 
 # gets a list of all followers from a given user
@@ -461,16 +402,30 @@ def single_tweet_replier(single_tweet_text, tweet_id):
 
 print("starting with the data downloads...")
 
-
 my_minion_extractor("minion_and_ids.csv", "awesome1_inc")
-tweet_fetcher("Casey")
-tweet_list_downloader("tweets_&_ids.csv", "#USA")
-follower_extractor("follower_and_ids.csv", "FactSoup")
+
+for single_account in tweet_source_list:
+    tweet_fetcher(single_account)
+
+for single_ht in hashtag_list:
+    tweet_list_downloader("tweets_and_ids.csv", single_ht)
+
+for single_source in handle_source_list:
+    follower_extractor("follower_and_ids.csv", single_source)
 
 dict_loader()
 
 print(minions_dict)
 
 print("starting with the outbound messages...")
+
+for single_minion_id in minions_dict.keys():
+    dm_sender(single_minion_id, "this is test message")
+
+
+while 1:
+
+
+
 
 

@@ -2,35 +2,35 @@
 
 def function1():
     rand_val = "x"
-   # print(f'random value is{rand_val}')
+    print(f'random value is{rand_val}')
 
     return rand_val
 
 
 def function2():
     rand_num = 17
-    #print(f'random value is{rand_num}')
+    print(f'random value is{rand_num}')
 
     return rand_num
 
 
 def function3():
     rand_val = "x"
-    #print(f'random value is{rand_val}')
+    print(f'random value is{rand_val}')
 
     return rand_val
 
 
 def function4():
     rand_val = "p"
-    #print(f'random value is{rand_val}')
+    print(f'random value is{rand_val}')
 
     return
 
 
 def function5():
     rand_num = 46
-    #print(f'random value is{rand_num}')
+    print(f'random value is{rand_num}')
 
     return rand_num
 
@@ -43,5 +43,9 @@ test_dict = {
     "e": function5()}
 
 print(str(123) + 'x')
+
+for single_key in test_dict.keys():
+    print(single_key)
+
 
 
