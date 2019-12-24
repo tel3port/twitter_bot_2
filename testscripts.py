@@ -1,4 +1,4 @@
-
+from random import randint
 
 def function1():
     rand_val = "x"
@@ -48,4 +48,8 @@ for single_key in test_dict.keys():
     print(single_key)
 
 
+mylist = list(test_dict.keys())
+mylist_len = len(mylist)
+
+print(">> ", mylist[randint(0, mylist_len-1)])
 

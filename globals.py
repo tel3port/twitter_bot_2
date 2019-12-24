@@ -9,7 +9,6 @@ dld_tweets_txt = "downloaded_handles.txt"
 value_holder_file = 'last_seen_id.txt'
 
 write = 'w'
-
 read = "r"
 
 CONSUMER_KEY = "vNdmTB5he6nZPMJ52alKPUSXE"

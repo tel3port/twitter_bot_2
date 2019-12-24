@@ -3,6 +3,7 @@ import globals as gls
 import csv
 import logging
 import glob
+from random import randint
 
 print("starting my engines...")
 
@@ -419,13 +420,13 @@ print(minions_dict)
 
 print("starting with the outbound messages...")
 
-for single_minion_id in minions_dict.keys():
-    dm_sender(single_minion_id, "this is test message")
-
 
 while 1:
+    minion_list = list(minions_dict.keys())
+    minion_len = len(minion_list)
+    single_minion_id = minion_list[randint(0, minion_len-1)]
 
-
+    dm_sender(single_minion_id, "this is test message")
 
 
 
