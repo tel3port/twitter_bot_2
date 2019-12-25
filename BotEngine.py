@@ -3,7 +3,7 @@ import globals as gls
 import csv
 import logging
 import glob
-from random import randint, choice
+from random import randint
 
 print("starting my engines...")
 
@@ -18,8 +18,8 @@ handle_source_list = ["FactSoup",
                       "#Christmas"
                       ]
 hashtag_list = ["#USA",
-                "#Christians",
-                "#Christmas",
+                "#GetWellSoonWendy",
+                "#MerryChrismas",
                 "#TwitterMomentOfTheDecade"
                 ]
 tweet_source_list = ["FactSoup",
@@ -139,9 +139,9 @@ def follower_extractor(follower_and_id_csv, single_handle):
     try:
         fol_id_csv = open(follower_and_id_csv, gls.write)
         csv_writer = csv.writer(fol_id_csv)
-        for single_follower in tweepy.Cursor(gls.api.followers, screen_name=single_handle).items():
-            print(f"{single_follower.id} - {single_follower.screen_name}")
-            csv_writer.writerow([str(single_follower.id)+'x', single_follower.screen_name.encode('utf-8')])
+        for a_follower in tweepy.Cursor(gls.api.followers, screen_name=single_handle).items():
+            print(f"{a_follower.id} - {a_follower.screen_name}")
+            csv_writer.writerow([str(a_follower.id)+'x', a_follower.screen_name.encode('utf-8')])
             print("row (hopefully )written into csv")
 
     except tweepy.TweepError as em:
@@ -166,8 +166,6 @@ def tweet_fetcher(screen_name):
 
     # save most recent tweets
     all_tweets.extend(new_tweets)
-
-    print(all_tweets)
 
     # save the id of the oldest tweet less one
     oldest = all_tweets[-1].id - 1
@@ -194,7 +192,10 @@ def tweet_fetcher(screen_name):
     with open(gls.downloaded_tweets_csv, gls.write) as f:
         writer = csv.writer(f)
         writer.writerow(["id", "created_at", "text"])
-        writer.writerows(out_tweets)
+        for twit in out_tweets:
+            writer.writerow(twit)
+            writer.writerow(["1163451084704079873e, 12-12-2019, 'retweet, register free and win: https://cool-giveaways.weebly.com/ #MerryChrismas'"])
+            writer.writerow(["116345108470407956e, 12-12-2019, 'treat your best friend this season https://amzn.to/379FhAY #dogsofinstagram'"])
 
     pass
 
@@ -402,68 +403,66 @@ def single_tweet_replier(single_tweet_text, tweet_id):
 
 print("starting with the data downloads...")
 
-my_minion_extractor(gls.minion_ids_csv, gls.twitter_ac_1)
-
-for single_account in tweet_source_list:
-    tweet_fetcher(single_account)
-
-for single_ht in hashtag_list:
-    tweet_list_downloader(gls.tweets_ids_csv, single_ht)
-
-for single_source in handle_source_list:
-    follower_extractor(gls.follower_ids_csv, single_source)
-
-dict_loader()
-
-print(minions_dict)
-
-print("starting with the outbound messages...")
-
 while 1:
-    minion_list = list(minions_dict.keys())
-    minion_len = len(minion_list)
-    single_minion_id = minion_list[randint(0, minion_len-1)]
+    my_minion_extractor(gls.minion_ids_csv, gls.twitter_ac_1)
 
-    dld_twt_list = list(dld_tweet_dict.values())
-    dld_twt_list_len = len(dld_twt_list)
-    single_twt = dld_twt_list[randint(0, dld_twt_list_len-1)]
+    for single_account in tweet_source_list:
+        tweet_fetcher(single_account)
 
-    dld_twt_id_list = list(dld_tweet_dict.keys())
-    dld_twt_id_len = len(dld_twt_id_list)
-    single_twt_id = dld_twt_list[randint(0, dld_twt_id_len-1)]
+    for single_ht in hashtag_list:
+        tweet_list_downloader(gls.tweets_ids_csv, single_ht)
 
-    follower_list = list(follower_id_dict.values())
-    follower_id_len = len(follower_list)
-    single_follower = follower_list[randint(0, follower_id_len-1)]
+    for single_source in handle_source_list:
+        follower_extractor(gls.follower_ids_csv, single_source)
 
-    hashtag_list_len = len(hashtag_list)
-    single_ht = hashtag_list[randint(0, hashtag_list_len-1)]
+    dict_loader()
 
-    s_image = image_list[randint(0, len(image_list)-1)]
+    print(minions_dict)
 
-    dm_sender(single_minion_id, f'{single_twt}  you might like this: " https://cool-giveaways.weebly.com/')
+    print("starting with the outbound messages...")
 
-    gls.sleep_time()
+    for _ in range(123):
+        minion_list = list(minions_dict.keys())
+        minion_len = len(minion_list)
+        single_minion_id = minion_list[randint(0, minion_len-1)]
 
-    tweet_sender(single_handle=single_follower, single_tweet=single_twt, single_hashtag=single_ht)
+        dld_twt_list = list(dld_tweet_dict.values())
+        dld_twt_list_len = len(dld_twt_list)
+        single_twt = dld_twt_list[randint(0, dld_twt_list_len-1)]
 
-    gls.sleep_time()
+        dld_twt_id_list = list(dld_tweet_dict.keys())
+        dld_twt_id_len = len(dld_twt_id_list)
+        single_twt_id = dld_twt_list[randint(0, dld_twt_id_len-1)]
 
-    twitter_user_follower(single_handle=single_follower)
+        follower_list = list(follower_id_dict.values())
+        follower_id_len = len(follower_list)
+        single_follower = follower_list[randint(0, follower_id_len-1)]
 
-    gls.sleep_time()
+        hashtag_list_len = len(hashtag_list)
+        single_ht = hashtag_list[randint(0, hashtag_list_len-1)]
 
-    custom_replier()
+        s_image = image_list[randint(0, len(image_list)-1)]
 
-    gls.sleep_time()
+        dm_sender(single_minion_id, f'{single_twt}  you might like this: " https://cool-giveaways.weebly.com/')
 
-    image_tweeter(single_image=s_image, single_tweet=gls.usa_giveaway, single_hashtag=single_ht)
+        gls.sleep_time()
 
-    gls.sleep_time()
+        tweet_sender(single_handle=single_follower, single_tweet=single_twt, single_hashtag=single_ht)
 
-    single_tweet_replier(single_tweet_text=single_twt, tweet_id=single_twt_id)
+        gls.sleep_time()
 
-    gls.sleep_time()
+        twitter_user_follower(single_handle=single_follower)
 
+        gls.sleep_time()
 
+        custom_replier()
 
+        gls.sleep_time()
+
+        image_tweeter(single_image=s_image, single_tweet=gls.usa_giveaway, single_hashtag=single_ht)
+
+        gls.sleep_time()
+
+        single_tweet_replier(single_tweet_text=single_twt, tweet_id=single_twt_id)
+
+        gls.sleep_time()
