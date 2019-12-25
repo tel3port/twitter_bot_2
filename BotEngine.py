@@ -443,15 +443,27 @@ while 1:
 
     dm_sender(single_minion_id, f'{single_twt}  you might like this: " https://cool-giveaways.weebly.com/')
 
+    gls.sleep_time()
+
     tweet_sender(single_handle=single_follower, single_tweet=single_twt, single_hashtag=single_ht)
+
+    gls.sleep_time()
 
     twitter_user_follower(single_handle=single_follower)
 
+    gls.sleep_time()
+
     custom_replier()
+
+    gls.sleep_time()
 
     image_tweeter(single_image=s_image, single_tweet=gls.usa_giveaway, single_hashtag=single_ht)
 
+    gls.sleep_time()
+
     single_tweet_replier(single_tweet_text=single_twt, tweet_id=single_twt_id)
+
+    gls.sleep_time()
 
 
 
