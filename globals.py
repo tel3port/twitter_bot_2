@@ -3,10 +3,20 @@ from random import randint
 import logging
 import time
 
-tweets_csv = "tweets.csv"
-handles_txt = 'handles.txt'
-dld_tweets_txt = "downloaded_handles.txt"
 value_holder_file = 'last_seen_id.txt'
+
+minion_ids_csv = "minion_and_ids.csv"
+downloaded_tweets_csv = "downloaded_tweets.csv"
+tweets_ids_csv = "ht_tweets_and_ids.csv"
+follower_ids_csv = "follower_and_ids.csv"
+usa_giveaway = "https://cool-giveaways.weebly.com/"
+
+twitter_ac_1 = "GikSoundz"
+twitter_ac_2 = "awesome1_inc"
+twitter_ac_3 = ""
+twitter_ac_4 = ""
+twitter_ac_5 = ""
+
 
 write = 'w'
 read = "r"

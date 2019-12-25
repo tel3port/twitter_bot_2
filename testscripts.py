@@ -1,5 +1,6 @@
 from random import randint
 
+
 def function1():
     rand_val = "x"
     print(f'random value is{rand_val}')

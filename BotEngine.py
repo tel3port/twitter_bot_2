@@ -3,14 +3,14 @@ import globals as gls
 import csv
 import logging
 import glob
-from random import randint
+from random import randint, choice
 
 print("starting my engines...")
 
-minions_dict = {}
-dld_tweet_dict = {}
-ht_tweet_dict = {}
-follower_id_dict = {}
+minions_dict = {}  # minion_twitter_id:minion_name from minion_and_ids.csv
+dld_tweet_dict = {}  # tweet_id:tweet_text from downloaded_tweets.csv
+ht_tweet_dict = {}  # tweet_id:tweet_txt from ht_tweets_and_ids.csv
+follower_id_dict = {}  # follower_id:follower_name from follower_and_ids.csv
 
 handle_source_list = ["FactSoup",
                       "Casey",
@@ -30,16 +30,15 @@ image_list = glob.glob("media/*")
 
 
 def dict_loader():  # loads all downloaded data into respective dictionaries
-
     try:
-        with open("minion_and_ids.csv", gls.read) as rdr:
+        with open(gls.minion_ids_csv, gls.read) as rdr:
             reader = csv.reader(rdr, delimiter=",")
             for single_row in reader:
 
                 minions_dict[single_row[0][:-1]] = single_row[1]  # adding minion data as key value pairs
 
     except IOError as x:
-        print("problem reading the minions_and_ids csv")
+        print("problem reading the minion_and_ids csv")
         logging.error('Error occurred ' + str(x))
     except Exception as e:
         print("the problem is: ", e)
@@ -52,7 +51,7 @@ def dict_loader():  # loads all downloaded data into respective dictionaries
     first_line = True
 
     try:
-        with open("downloaded_tweets.csv", gls.read) as rdr:
+        with open(gls.downloaded_tweets_csv, gls.read) as rdr:
             reader = csv.reader(rdr, delimiter=",")
             for single_row in reader:
                 if first_line:  # this skips th first line
@@ -75,7 +74,7 @@ def dict_loader():  # loads all downloaded data into respective dictionaries
     first_line = True
 
     try:
-        with open("tweets_&_ids.csv", gls.read) as rdr:
+        with open(gls.tweets_ids_csv, gls.read) as rdr:
             reader = csv.reader(rdr, delimiter=",")
             for single_row in reader:
                 if first_line:  # this skips th first line
@@ -98,7 +97,7 @@ def dict_loader():  # loads all downloaded data into respective dictionaries
     first_line = True
 
     try:
-        with open("follower_and_ids.csv", gls.read) as rdr:
+        with open(gls.follower_ids_csv, gls.read) as rdr:
             reader = csv.reader(rdr, delimiter=",")
             for single_row in reader:
                 if first_line:  # this skips th first line
@@ -192,7 +191,7 @@ def tweet_fetcher(screen_name):
     out_tweets = [[tweet.id_str+'x', tweet.created_at, tweet.text.encode("utf-8")] for tweet in all_tweets]
 
     # write the csv
-    with open("downloaded_tweets.csv", gls.write) as f:
+    with open(gls.downloaded_tweets_csv, gls.write) as f:
         writer = csv.writer(f)
         writer.writerow(["id", "created_at", "text"])
         writer.writerows(out_tweets)
@@ -220,6 +219,39 @@ def my_minion_extractor(my_minion_csv, my_twitter_ac):
         print("minion extraction done")
 
         pass
+
+
+# downloads likes and retweets and saves on a given hashtag
+def tweet_list_downloader(downloaded_tweets_csv, hashtag):
+    gls.log_file_writer()
+
+    try:
+        tweets_csv = open(downloaded_tweets_csv, gls.write)
+        csv_writer = csv.writer(tweets_csv)
+        print("hashtag downloading on: ", hashtag)
+        for single_tweet in tweepy.Cursor(gls.api.search, q=hashtag, rpp=1200, lang="en", since="2018-08-17").items(100000):
+            print(single_tweet.id_str)
+            single_tweet.favorite()
+            gls.sleep_time()
+            single_tweet.retweet()
+
+            print(single_tweet.author, single_tweet.created_at, single_tweet.text)
+
+            csv_writer.writerow([str(single_tweet.id_str)+'x', single_tweet.text.encode('utf-8')])
+
+            print("row (hopefully) written into csv")
+
+    except IOError as e2:
+        logging.error('Error occurred ' + str(e2))
+
+    except tweepy.TweepError as e3:
+        logging.error('Error occurred ' + str(e3))
+
+    except Exception as x4:
+        logging.error('Error occurred ' + str(x4))
+
+    finally:
+        print("end of like and retweet cycle")
 
 
 # only sends dms to people that follow me
@@ -326,39 +358,6 @@ def custom_replier():
     print("custom_replier() has terminated ")
 
 
-# downloads likes and retweets and saves on a given hashtag
-def tweet_list_downloader(downloaded_tweets_csv, hashtag):
-    gls.log_file_writer()
-
-    try:
-        tweets_csv = open(downloaded_tweets_csv, gls.write)
-        csv_writer = csv.writer(tweets_csv)
-        print("hashtag downloading on: ", hashtag)
-        for single_tweet in tweepy.Cursor(gls.api.search, q=hashtag, rpp=1200, lang="en", since="2018-08-17").items(100000):
-            print(single_tweet.id_str)
-            single_tweet.favorite()
-            gls.sleep_time()
-            single_tweet.retweet()
-
-            print(single_tweet.author, single_tweet.created_at, single_tweet.text)
-
-            csv_writer.writerow([str(single_tweet.id_str)+'x', single_tweet.text.encode('utf-8')])
-
-            print("row (hopefully) written into csv")
-
-    except IOError as e2:
-        logging.error('Error occurred ' + str(e2))
-
-    except tweepy.TweepError as e3:
-        logging.error('Error occurred ' + str(e3))
-
-    except Exception as x4:
-        logging.error('Error occurred ' + str(x4))
-
-    finally:
-        print("end of like and retweet cycle")
-
-
 # tweets out images
 def image_tweeter(single_image, single_tweet, single_hashtag):
     print("starting image_tweeter()")
@@ -403,16 +402,16 @@ def single_tweet_replier(single_tweet_text, tweet_id):
 
 print("starting with the data downloads...")
 
-my_minion_extractor("minion_and_ids.csv", "awesome1_inc")
+my_minion_extractor(gls.minion_ids_csv, gls.twitter_ac_1)
 
 for single_account in tweet_source_list:
     tweet_fetcher(single_account)
 
 for single_ht in hashtag_list:
-    tweet_list_downloader("tweets_and_ids.csv", single_ht)
+    tweet_list_downloader(gls.tweets_ids_csv, single_ht)
 
 for single_source in handle_source_list:
-    follower_extractor("follower_and_ids.csv", single_source)
+    follower_extractor(gls.follower_ids_csv, single_source)
 
 dict_loader()
 
@@ -420,13 +419,39 @@ print(minions_dict)
 
 print("starting with the outbound messages...")
 
-
 while 1:
     minion_list = list(minions_dict.keys())
     minion_len = len(minion_list)
     single_minion_id = minion_list[randint(0, minion_len-1)]
 
-    dm_sender(single_minion_id, "this is test message")
+    dld_twt_list = list(dld_tweet_dict.values())
+    dld_twt_list_len = len(dld_twt_list)
+    single_twt = dld_twt_list[randint(0, dld_twt_list_len-1)]
+
+    dld_twt_id_list = list(dld_tweet_dict.keys())
+    dld_twt_id_len = len(dld_twt_id_list)
+    single_twt_id = dld_twt_list[randint(0, dld_twt_id_len-1)]
+
+    follower_list = list(follower_id_dict.values())
+    follower_id_len = len(follower_list)
+    single_follower = follower_list[randint(0, follower_id_len-1)]
+
+    hashtag_list_len = len(hashtag_list)
+    single_ht = hashtag_list[randint(0, hashtag_list_len-1)]
+
+    s_image = image_list[randint(0, len(image_list)-1)]
+
+    dm_sender(single_minion_id, f'{single_twt}  you might like this: " https://cool-giveaways.weebly.com/')
+
+    tweet_sender(single_handle=single_follower, single_tweet=single_twt, single_hashtag=single_ht)
+
+    twitter_user_follower(single_handle=single_follower)
+
+    custom_replier()
+
+    image_tweeter(single_image=s_image, single_tweet=gls.usa_giveaway, single_hashtag=single_ht)
+
+    single_tweet_replier(single_tweet_text=single_twt, tweet_id=single_twt_id)
 
 
 
