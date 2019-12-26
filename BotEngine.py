@@ -28,6 +28,8 @@ tweet_source_list = ["FactSoup",
                      "ithinkthatway"]
 image_list = glob.glob("media/*")
 
+index = randint(0, len(gls.api_object_list)-1)
+
 
 def dict_loader():  # loads all downloaded data into respective dictionaries
     try:
@@ -139,9 +141,9 @@ def follower_extractor(follower_and_id_csv, single_handle):
     try:
         fol_id_csv = open(follower_and_id_csv, gls.write)
         csv_writer = csv.writer(fol_id_csv)
-        for a_follower in tweepy.Cursor(gls.api.followers, screen_name=single_handle).items():
+        for a_follower in tweepy.Cursor(api.followers, screen_name=single_handle).items():
             print(f"{a_follower.id} - {a_follower.screen_name}")
-            csv_writer.writerow([str(a_follower.id)+'x', a_follower.screen_name.encode('utf-8')])
+            csv_writer.writerow([str(a_follower.id)+'x', a_follower.screen_name])
             print("row (hopefully )written into csv")
 
     except tweepy.TweepError as em:
@@ -162,7 +164,7 @@ def tweet_fetcher(screen_name):
     all_tweets = []
 
     # make initial request for most recent tweets (200 is the maximum allowed count)
-    new_tweets = gls.api.user_timeline(screen_name=screen_name, count=200)
+    new_tweets = api.user_timeline(screen_name=screen_name, count=200)
 
     # save most recent tweets
     all_tweets.extend(new_tweets)
@@ -175,7 +177,7 @@ def tweet_fetcher(screen_name):
         print("getting tweets before %s" % oldest)
 
         # all subsequent requests use the max_id param to prevent duplicates
-        new_tweets = gls.api.user_timeline(screen_name=screen_name, count=200, max_id=oldest)
+        new_tweets = api.user_timeline(screen_name=screen_name, count=200, max_id=oldest)
 
         # save most recent tweets
         all_tweets.extend(new_tweets)
@@ -186,7 +188,7 @@ def tweet_fetcher(screen_name):
         print("...%s tweets downloaded so far" % (len(all_tweets)))
 
     # transform the tweepy tweets into a 2D array that will populate the csv
-    out_tweets = [[tweet.id_str+'x', tweet.created_at, tweet.text.encode("utf-8")] for tweet in all_tweets]
+    out_tweets = [[tweet.id_str+'x', tweet.created_at, tweet.text] for tweet in all_tweets]
 
     # write the csv
     with open(gls.downloaded_tweets_csv, gls.write) as f:
@@ -194,8 +196,8 @@ def tweet_fetcher(screen_name):
         writer.writerow(["id", "created_at", "text"])
         for twit in out_tweets:
             writer.writerow(twit)
-            writer.writerow(["1163451084704079873e, 12-12-2019, 'retweet, register free and win: https://cool-giveaways.weebly.com/ #MerryChrismas'"])
-            writer.writerow(["116345108470407956e, 12-12-2019, 'treat your best friend this season https://amzn.to/379FhAY #dogsofinstagram'"])
+            writer.writerow(["1163451084704079873e", "12-12-2019", "retweet, register free and win: https://cool-giveaways.weebly.com/ #MerryChrismas"])
+            writer.writerow(["1716345108470407956e", "12-12-2019", "treat your best friend this season https://amzn.to/379FhAY #dogsofinstagram"])
 
     pass
 
@@ -203,13 +205,14 @@ def tweet_fetcher(screen_name):
 # this loop gets a list handles and ids of everyone i follow
 def my_minion_extractor(my_minion_csv, my_twitter_ac):
     print(" minion_extractor() starting...")
+
     gls.log_file_writer()
     try:
         minion_csv = open(my_minion_csv, gls.write)
         csv_writer = csv.writer(minion_csv)
-        for single_minion in tweepy.Cursor(gls.api.followers, screen_name=my_twitter_ac).items():
+        for single_minion in tweepy.Cursor(api.followers, screen_name=my_twitter_ac).items():
             print(f"minion id: {single_minion.id} -  minion name: {single_minion.screen_name}")
-            csv_writer.writerow([str(single_minion.id)+'x', single_minion.screen_name.encode('utf-8')])
+            csv_writer.writerow([str(single_minion.id)+'x', single_minion.screen_name])
             print("row (hopefully )written into csv")
 
     except tweepy.TweepError as ev:
@@ -230,7 +233,7 @@ def tweet_list_downloader(downloaded_tweets_csv, hashtag):
         tweets_csv = open(downloaded_tweets_csv, gls.write)
         csv_writer = csv.writer(tweets_csv)
         print("hashtag downloading on: ", hashtag)
-        for single_tweet in tweepy.Cursor(gls.api.search, q=hashtag, rpp=1200, lang="en", since="2018-08-17").items(100000):
+        for single_tweet in tweepy.Cursor(api.search, q=hashtag, rpp=1200, lang="en", since="2018-08-17").items(100000):
             print(single_tweet.id_str)
             single_tweet.favorite()
             gls.sleep_time()
@@ -238,7 +241,7 @@ def tweet_list_downloader(downloaded_tweets_csv, hashtag):
 
             print(single_tweet.author, single_tweet.created_at, single_tweet.text)
 
-            csv_writer.writerow([str(single_tweet.id_str)+'x', single_tweet.text.encode('utf-8')])
+            csv_writer.writerow([str(single_tweet.id_str)+'x', single_tweet.text])
 
             print("row (hopefully) written into csv")
 
@@ -261,7 +264,7 @@ def dm_sender(minion_id, text):
 
     gls.log_file_writer()
     try:
-        gls.api.send_direct_message(minion_id, text)
+        api.send_direct_message(minion_id, text)
 
     except tweepy.TweepError as ue:
         logging.error('Error occurred ' + str(ue))
@@ -282,7 +285,7 @@ def tweet_sender(single_handle, single_tweet, single_hashtag):
     gls.log_file_writer()
 
     try:
-        gls.api.update_status(f'hey @{single_handle}, {single_tweet} {single_hashtag}')
+        api.update_status(f'hey @{single_handle}, {single_tweet} {single_hashtag}')
 
         gls.sleep_time()
 
@@ -305,7 +308,7 @@ def twitter_user_follower(single_handle):
 
         print(f"creating friendship with: {single_handle}")
 
-        gls.api.create_friendship(screen_name=single_handle)
+        api.create_friendship(screen_name=single_handle)
 
         gls.sleep_time()
 
@@ -330,7 +333,7 @@ def custom_replier():
         print("replying to custom mentions...")
         last_seen_id = get_last_seen_id(gls.value_holder_file)
 
-        mentions = gls.api.mentions_timeline(last_seen_id, tweet_mode='extended')
+        mentions = api.mentions_timeline(last_seen_id, tweet_mode='extended')
         # print(mentions[0].__dict__.keys())  # converts list into dict and extracts all the keys
         #
         # print(mentions[0].text)
@@ -341,8 +344,8 @@ def custom_replier():
             last_seen_id = single_mention.id
             save_last_seen_id(last_seen_id, gls.value_holder_file)
 
-            gls.api.update_status(
-                f'this is custom message',
+            api.update_status(
+                "merry christmas and happy new year",
                 single_mention.id)
 
             gls.sleep_time()
@@ -366,7 +369,7 @@ def image_tweeter(single_image, single_tweet, single_hashtag):
     gls.log_file_writer()
 
     try:
-        gls.api.update_with_media(single_image, f"{single_tweet} {single_hashtag}")
+        api.update_with_media(single_image, f"{single_tweet} {single_hashtag}")
 
         gls.sleep_time()
 
@@ -385,8 +388,10 @@ def single_tweet_replier(single_tweet_text, tweet_id):
 
     gls.log_file_writer()
 
+    refreshed_tweet = f"{single_tweet_text} #LessonsNotLearned"
+
     try:
-        gls.api.update_status(status=single_tweet_text, in_reply_to_status_id=tweet_id[:-1])
+        api.update_status(status=refreshed_tweet, in_reply_to_status_id=tweet_id[:-1])
         gls.sleep_time()
 
     except tweepy.TweepError as re:
@@ -404,6 +409,9 @@ def single_tweet_replier(single_tweet_text, tweet_id):
 print("starting with the data downloads...")
 
 while 1:
+    # random api object for each iteration
+    api = gls.api_object_list[index]
+
     my_minion_extractor(gls.minion_ids_csv, gls.twitter_ac_1)
 
     for single_account in tweet_source_list:
@@ -417,52 +425,57 @@ while 1:
 
     dict_loader()
 
-    print(minions_dict)
+    print("minions dictionary ", minions_dict)
 
     print("starting with the outbound messages...")
 
     for _ in range(123):
-        minion_list = list(minions_dict.keys())
-        minion_len = len(minion_list)
-        single_minion_id = minion_list[randint(0, minion_len-1)]
+        try:
+            minion_list = list(minions_dict.keys())
+            minion_len = len(minion_list)
+            single_minion_id = minion_list[randint(0, minion_len-1)]
 
-        dld_twt_list = list(dld_tweet_dict.values())
-        dld_twt_list_len = len(dld_twt_list)
-        single_twt = dld_twt_list[randint(0, dld_twt_list_len-1)]
+            dld_twt_list = list(dld_tweet_dict.values())
+            dld_twt_list_len = len(dld_twt_list)
+            single_twt = dld_twt_list[randint(0, dld_twt_list_len-1)]
 
-        dld_twt_id_list = list(dld_tweet_dict.keys())
-        dld_twt_id_len = len(dld_twt_id_list)
-        single_twt_id = dld_twt_list[randint(0, dld_twt_id_len-1)]
+            dld_twt_id_list = list(dld_tweet_dict.keys())
+            dld_twt_id_len = len(dld_twt_id_list)
+            single_twt_id = dld_twt_list[randint(0, dld_twt_id_len-1)]
 
-        follower_list = list(follower_id_dict.values())
-        follower_id_len = len(follower_list)
-        single_follower = follower_list[randint(0, follower_id_len-1)]
+            follower_list = list(follower_id_dict.values())
+            follower_id_len = len(follower_list)
+            single_follower = follower_list[randint(0, follower_id_len-1)]
 
-        hashtag_list_len = len(hashtag_list)
-        single_ht = hashtag_list[randint(0, hashtag_list_len-1)]
+            hashtag_list_len = len(hashtag_list)
+            single_ht = hashtag_list[randint(0, hashtag_list_len-1)]
 
-        s_image = image_list[randint(0, len(image_list)-1)]
+            s_image = image_list[randint(0, len(image_list)-1)]
 
-        dm_sender(single_minion_id, f'{single_twt}  you might like this: " https://cool-giveaways.weebly.com/')
+            dm_sender(single_minion_id, f'{single_twt}   you might like this: " https://cool-giveaways.weebly.com/')
 
-        gls.sleep_time()
+            gls.sleep_time()
 
-        tweet_sender(single_handle=single_follower, single_tweet=single_twt, single_hashtag=single_ht)
+            tweet_sender(single_handle=single_follower, single_tweet=single_twt, single_hashtag=single_ht)
 
-        gls.sleep_time()
+            gls.sleep_time()
 
-        twitter_user_follower(single_handle=single_follower)
+            twitter_user_follower(single_handle=single_follower)
 
-        gls.sleep_time()
+            gls.sleep_time()
 
-        custom_replier()
+            custom_replier()
 
-        gls.sleep_time()
+            gls.sleep_time()
 
-        image_tweeter(single_image=s_image, single_tweet=gls.usa_giveaway, single_hashtag=single_ht)
+            image_tweeter(single_image=s_image, single_tweet=gls.usa_giveaway, single_hashtag=single_ht)
 
-        gls.sleep_time()
+            gls.sleep_time()
 
-        single_tweet_replier(single_tweet_text=single_twt, tweet_id=single_twt_id)
+            single_tweet_replier(single_tweet_text=single_twt, tweet_id=single_twt_id)
 
-        gls.sleep_time()
+            gls.sleep_time()
+
+        except Exception as ws:
+            logging.error('Error occurred ' + str(ws))
+

@@ -21,14 +21,17 @@ twitter_ac_5 = ""
 write = 'w'
 read = "r"
 
-CONSUMER_KEY = "vNdmTB5he6nZPMJ52alKPUSXE"
-CONSUMER_SECRET = "R5vdHLRj6c6KZYwPZwMFRC0viJCsSXlGDZtmbGC3dMudteq0Wg"
-ACCESS_KEY = "1027222327044517888-xk7V2qkRygrC53122WMwVvGNCxCwLL"
-ACCESS_SECRET = "X513wVVUW3yyIE3HnEmSEaGdYWsmHIcVBeHUGUdX9TcvI"
+CONSUMER_KEY1 = "vNdmTB5he6nZPMJ52alKPUSXE"
+CONSUMER_SECRET1 = "R5vdHLRj6c6KZYwPZwMFRC0viJCsSXlGDZtmbGC3dMudteq0Wg"
+ACCESS_KEY1 = "1027222327044517888-xk7V2qkRygrC53122WMwVvGNCxCwLL"
+ACCESS_SECRET1 = "X513wVVUW3yyIE3HnEmSEaGdYWsmHIcVBeHUGUdX9TcvI"
 
-auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
-api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+auth1 = tweepy.OAuthHandler(CONSUMER_KEY1, CONSUMER_SECRET1)
+auth1.set_access_token(ACCESS_KEY1, ACCESS_SECRET1)
+api1 = tweepy.API(auth1, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+
+
+api_object_list = [api1]
 
 
 random_num = randint(1, 5)
