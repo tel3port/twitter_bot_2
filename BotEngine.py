@@ -28,7 +28,7 @@ tweet_source_list = ["FactSoup",
                      "ithinkthatway"]
 image_list = glob.glob("media/*")
 
-index = randint(0, len(gls.api_object_list)-1)
+
 
 
 def dict_loader():  # loads all downloaded data into respective dictionaries
@@ -407,12 +407,19 @@ def single_tweet_replier(single_tweet_text, tweet_id):
 
 
 print("starting with the data downloads...")
-
+iteration_count = 0
 while 1:
     # random api object for each iteration
-    api = gls.api_object_list[index]
+    iteration_count += 1
+    print('outer iteration number: ', iteration_count)
 
-    my_minion_extractor(gls.minion_ids_csv, gls.twitter_ac_1)
+    index = randint(0, len(gls.api_object_list) - 1)
+    api = gls.api_object_list[index]
+    twitter_acc = gls.twitter_account_list[index]
+
+    print("account number", index)
+
+    my_minion_extractor(gls.minion_ids_csv, twitter_acc)
 
     for single_account in tweet_source_list:
         tweet_fetcher(single_account)
